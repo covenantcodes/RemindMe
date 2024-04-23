@@ -1,5 +1,4 @@
 import { StyleSheet, View, Text } from 'react-native'
-import React from 'react'
 import { OnboardingData } from '../data/data'
 import LottieView from 'lottie-react-native';
 
