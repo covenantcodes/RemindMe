@@ -1,15 +1,45 @@
-import { StyleSheet, View, Text } from 'react-native'
+import { StyleSheet, View, Text, useWindowDimensions } from 'react-native'
 import { OnboardingData } from '../data/data'
 import LottieView from 'lottie-react-native';
+import Animated, { Extrapolation, SharedValue, interpolate, useAnimatedStyle } from 'react-native-reanimated';
 
 type Props = {
     item: OnboardingData;
     index: number;
+    x: SharedValue<number>;
 }
 
-const RenderItem = ({item, index}: Props) => {
+const RenderItem = ({item, index, x}: Props) => {
+  const {width: SCREEN_WIDTH} = useWindowDimensions();
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const scale = interpolate(
+      Math.abs(x.value),
+      [
+        (index - 1) * SCREEN_WIDTH,
+        index * SCREEN_WIDTH,
+        (index + 1) * SCREEN_WIDTH
+      ],
+      [0.5, 1, 0.5],
+      Extrapolation.CLAMP
+    );
+
+    const translateY = interpolate(
+      Math.abs(x.value),
+      [ 
+        (index - 1) * SCREEN_WIDTH,
+        index * SCREEN_WIDTH,
+        (index + 1) * SCREEN_WIDTH
+      ],
+      [100, 0, 100],
+      Extrapolation.CLAMP,
+     )
+    return {
+      transform: [{scale}, {translateY}],
+    };
+  })
   return (
-    <View style={[styles.itemContainer, {backgroundColor:item.backgroundColor}]}>
+    <Animated.View style={[styles.itemContainer, {backgroundColor:item.backgroundColor}, animatedStyle]}>
       <View style={[styles.animationContainer, {backgroundColor: item.animationBg}]}>
         <LottieView
           source={item.animation}
@@ -20,7 +50,7 @@ const RenderItem = ({item, index}: Props) => {
         />
       </View>
       <Text style={[styles.itemText, {color: item.textColor}]}>{item.text}</Text>
-    </View>
+    </Animated.View>
   )
 }
 
