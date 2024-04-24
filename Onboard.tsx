@@ -21,7 +21,7 @@ import Background from "./src/components/Background";
 import Circle from "./src/components/Circle";
 type Props = {};
 
-const App = () => {
+const Onboard = () => {
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const x = useSharedValue(0);
   const context = useSharedValue(0);
@@ -126,4 +126,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default Onboard;
