@@ -13,7 +13,7 @@ const data: OnboardingData[] = [
   {
     id: 1,
     animation: require('../../assets/animations/Animation1.json'),
-    text: 'Lorem Ipsum dolor sit amet',
+    text: '',
     textColor: '#ffffff',
     backgroundColor: '#fcb7d7',
     animationBg: '#ffffff',

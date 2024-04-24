@@ -19,11 +19,14 @@
     x: SharedValue<number>;
     currentIndex: number;
   };
-
+  import { useNavigation } from "@react-navigation/native";
+  
   const RADIUS = 100;
   const iconColor: string = "#003cc9";
-
+  
   const Button = ({ data, screenWidth, x, currentIndex }: Props) => {
+    const navigation = useNavigation();
+
     const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
     const animatedOpacityButton = useAnimatedStyle(() => {
       const opacity = interpolate(
@@ -40,14 +43,29 @@
     return (
       <AnimatedPressable
         style={[styles.button, animatedOpacityButton]}
+        // onPress={() => {
+        //   if (Math.abs(x.value) % screenWidth === 0) {
+        //     const clampValue = clamp(
+        //       Math.abs(x.value) + screenWidth,
+        //       0,
+        //       2 * screenWidth
+        //     );
+        //     x.value = withTiming(-clampValue, { duration: 1000 });
+        //   }
+        // }}
         onPress={() => {
           if (Math.abs(x.value) % screenWidth === 0) {
-            const clampValue = clamp(
-              Math.abs(x.value) + screenWidth,
-              0,
-              2 * screenWidth
-            );
-            x.value = withTiming(-clampValue, { duration: 1000 });
+            if (currentIndex === data.length - 1) {
+              // Navigate to the new screen using navigation library
+              navigation.navigate('Home');
+            } else {
+              const clampValue = clamp(
+                Math.abs(x.value) + screenWidth,
+                0,
+                2 * screenWidth
+              );
+              x.value = withTiming(-clampValue, { duration: 1000 });
+            }
           }
         }}
       >
