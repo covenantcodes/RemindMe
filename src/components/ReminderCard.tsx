@@ -10,7 +10,6 @@ type Props = {
   reminderTime: string,
 };
 
-const settingIconColor: string = "#44196c";
 const pickerIconColor: string = "#fff";
 
 const ReminderCard = ({reminderTitle, reminderDescription, reminderDate, reminderTime}:Props) => {
@@ -40,6 +39,7 @@ const styles = StyleSheet.create({
 
   remindersBoxContainer: {
     paddingHorizontal: 20,
+    paddingVertical: 10,
   },
 
   remindersBox: {
