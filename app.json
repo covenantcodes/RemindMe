@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "RemindMe",
-    "slug": "RemindMe",
+    "slug": "remindme",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -38,6 +38,12 @@
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e28a41a2-6679-4d9d-aa1d-3ad436ae50e6"
+      }
+    },
+    "owner": "potash"
   }
 }

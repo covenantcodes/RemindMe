@@ -1,6 +1,15 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { StyleSheet, Text, SafeAreaView, View, TouchableOpacity, FlatList } from "react-native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  SafeAreaView,
+  View,
+  TouchableOpacity,
+  FlatList,
+  Modal,
+  Platform
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -10,18 +19,18 @@ import DatePicker from "react-native-neat-date-picker";
 import TimePickerModal from "react-native-modal-datetime-picker";
 import ReminderCard from "./ReminderCard";
 import GlobalStyles from "./GlobalStyles";
-
-import {
-  BottomSheetModal,
-  BottomSheetModalProvider,
-} from "@gorhom/bottom-sheet"
+import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+// For Notifications
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
+import { scheduleNotificationAsync } from 'expo-notifications';
 
 type Reminder = {
-  id: number,
-  title: string,
-  description: string,
-  reminderDate: string,
-  reminderTime: string,
+  id: number;
+  title: string;
+  description: string;
+  reminderDate: string;
+  reminderTime: string;
 };
 
 const Home = () => {
@@ -32,6 +41,133 @@ const Home = () => {
   const [showDatePickerSingle, setShowDatePickerSingle] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [reminders, setReminders] = useState([]);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [editReminderId, setEditReminderId] = useState<number | null>(null);
+  const [editReminderTitle, setEditReminderTitle] = useState("");
+  const [editReminderDescription, setEditReminderDescription] = useState("");
+  const [editReminderDate, setEditReminderDate] = useState("");
+  const [editReminderTime, setEditReminderTime] = useState("");
+  const [expoPushToken, setExpoPushToken] = useState("");
+
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+
+  useEffect(()=> {
+    sendNotification();
+}, [reminders]);
+
+  useEffect(() => {
+    console.log("Registering for Push Notifications");
+    registerForPushNotificationsAsync()
+      .then((token) => {
+        console.log("token: ", token);
+        setExpoPushToken(token);
+      })
+      .catch((err) => console.log(err));
+  }, [])
+
+  async function registerForPushNotificationsAsync() {
+    let token;
+
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+
+    if (Device.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        alert("Failed to get push token for push notification!");
+        return;
+      }
+
+      token = (
+        await Notifications.getExpoPushTokenAsync({
+          projectId: "e28a41a2-6679-4d9d-aa1d-3ad436ae50e6",
+        })
+      ).data;
+      console.log(token);
+    } else {
+      alert("Must use physical device for Push Notifications");
+    }
+
+    return token;
+  }
+  
+  // const sendNotification = async () => {
+  //   console.log("Sending push notifications");
+
+  //     //Notification Message
+  //     const message = {
+  //       to: expoPushToken,
+  //       sound: "default",
+  //       title: "Reminder",
+  //       body: "Don't forget to take your medicine!",
+  //       // data: { data: "goes here" },
+  //     };
+
+  //   await fetch ("https://exp.host/--/api/v2/push/send", {
+  //     method: "POST",
+  //     headers:{
+  //         host: "exp.host",
+  //         accept:"application/json",
+  //         "accept-encoding":"gzip, deflate",
+  //         "content-type": "application/json",
+  //     },
+
+  //     body: JSON.stringify(message),
+  //   });
+
+  //   console.log(message)
+  // };
+
+  const sendNotification = async () => {
+    console.log("Scheduling push notifications");
+  
+    // Iterate over reminders and schedule notification for each one
+    reminders.forEach(async (reminder) => {
+      // Convert reminder date and time to a single Date object
+      const reminderDateTime = new Date(`${reminder.reminderDate} ${reminder.reminderTime}`);
+  
+      // Schedule notification
+      try {
+        await scheduleNotificationAsync({
+          content: {
+            title: reminder.title,
+            body: reminder.description,
+            sound: 'default',
+            // data: { data: 'goes here' },
+          },
+          trigger: {
+            date: reminderDateTime, // Schedule notification for the reminder date and time
+          },
+        });
+  
+        console.log("Notification scheduled for:", reminder.title);
+      } catch (error) {
+        console.error("Error scheduling notification:", error);
+      }
+    });
+  };
+  
+  
+  
 
   useEffect(() => {
     loadReminders();
@@ -65,7 +201,7 @@ const Home = () => {
         reminderDate,
         reminderTime,
       };
-      const updatedReminders = [...reminders, newReminder];
+      const updatedReminders = [newReminder, ...reminders]; // Add new reminder to the beginning of the array
       setReminders(updatedReminders);
       saveReminders(updatedReminders);
       setReminderTitle("");
@@ -76,11 +212,39 @@ const Home = () => {
       alert("Please fill in all fields.");
     }
   };
+  
 
   const handleDeleteReminder = (id: number) => {
     const updatedReminders = reminders.filter((reminder) => reminder.id !== id);
     setReminders(updatedReminders);
     saveReminders(updatedReminders);
+  };
+
+  const handleEditReminder = () => {
+    if (
+      editReminderTitle &&
+      editReminderDescription &&
+      editReminderDate &&
+      editReminderTime &&
+      editReminderId !== null
+    ) {
+      const updatedReminders = reminders.map((reminder) =>
+        reminder.id === editReminderId
+          ? {
+              ...reminder,
+              title: editReminderTitle,
+              description: editReminderDescription,
+              reminderDate: editReminderDate,
+              reminderTime: editReminderTime,
+            }
+          : reminder
+      );
+      setReminders(updatedReminders);
+      saveReminders(updatedReminders);
+      setIsPopupVisible(false);
+    } else {
+      alert("Please fill in all fields.");
+    }
   };
 
   const openDatePickerSingle = () => setShowDatePickerSingle(true);
@@ -103,13 +267,21 @@ const Home = () => {
     setReminderTime(time.toLocaleTimeString());
   };
 
-  // For Bottom Sheet
-  // ref
-  const bottomSheetModalRef = useRef(null);
+  const handleAddReminderAndSendNotification = () => {
+    handleAddReminder(); 
+    sendNotification();
+  };
+  
 
-  // variables
-  const snapPoints = ["25%", "50%"];
-
+  // CLOSE POPUP
+  const closemodal = () => {
+    setIsPopupVisible(false);
+    setEditReminderId(null);
+    setEditReminderTitle("");
+    setEditReminderDescription("");
+    setEditReminderDate("");
+    setEditReminderTime("");
+  };
 
   return (
     <SafeAreaView style={GlobalStyles.androidSafeArea}>
@@ -117,13 +289,96 @@ const Home = () => {
         colors={["#0d132a", "#44196c"]}
         style={styles.mainContainer}
       >
-        <DatePicker
-          isVisible={showDatePickerSingle}
-          colorOptions={{ headerColor: "#0d132a", backgroundColor: "#44196c", dateTextColor: "#fff" }}
-          mode="single"
-          onCancel={onCancelSingle}
-          onConfirm={onConfirmSingle}
-        />
+        <Modal
+          visible={isPopupVisible}
+          animationType="fade"
+          transparent
+          onRequestClose={() => setIsPopupVisible(crossfalse)}
+        >
+          <View style={styles.modalContainer}>
+            <LinearGradient
+              colors={["#032a80", "#3d0373"]}
+              style={styles.popup}
+            >
+              <View style={styles.closeContainer}>
+                <MaterialCommunityIcons
+                  name="close"
+                  color="white"
+                  size={20}
+                  onPress={closemodal}
+                />
+              </View>
+              {/* MODAL HEADER  */}
+              <View style={styles.modalHeader}>
+                <Text style={styles.todoModalText}>Edit Reminder</Text>
+              </View>
+              {/* MODAL CONTENTS */}
+              <GlassmorphismTextInput
+                placeholder="Reminder Title"
+                maxLength={12}
+                value={editReminderTitle}
+                onChangeText={setEditReminderTitle}
+              />
+              <GlassmorphismTextInput
+                placeholder="Reminder Description"
+                maxLength={32}
+                value={editReminderDescription}
+                onChangeText={setEditReminderDescription}
+                multiline={true}
+                numberOfLines={3}
+              />
+              <View style={styles.dateTimeContainer}>
+                <TouchableOpacity
+                  style={styles.dateContainer}
+                  onPress={openDatePickerSingle}
+                >
+                  <Text style={styles.dateText}>{editReminderDate}</Text>
+                  <FontAwesomeIcon
+                    icon={faCalendar as IconProp}
+                    color="#fff"
+                    size={20}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.dateContainer}
+                  onPress={() => setShowTimePicker(true)}
+                >
+                  <Text style={styles.dateText}>{editReminderTime}</Text>
+                  <FontAwesomeIcon
+                    icon={faClock as IconProp}
+                    color="#fff"
+                    size={20}
+                  />
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity
+                style={styles.buttonContainer}
+                onPress={handleEditReminder}
+              >
+                <LinearGradient
+                  colors={["#256afe", "#8124e7"]}
+                  style={styles.gradient}
+                >
+                  <Text style={styles.buttonText}>Edit Reminder</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </LinearGradient>
+          </View>
+        </Modal>
+
+        <View style={{ zIndex: 1000 }}>
+          <DatePicker
+            isVisible={showDatePickerSingle}
+            colorOptions={{
+              headerColor: "#0d132a",
+              backgroundColor: "#44196c",
+              dateTextColor: "#fff",
+            }}
+            mode="single"
+            onCancel={onCancelSingle}
+            onConfirm={onConfirmSingle}
+          />
+        </View>
 
         <TimePickerModal
           isVisible={showTimePicker}
@@ -188,13 +443,25 @@ const Home = () => {
 
         <TouchableOpacity
           style={styles.buttonContainer}
-          onPress={handleAddReminder}
+          onPress={handleAddReminderAndSendNotification}
         >
           <LinearGradient
             colors={["#256afe", "#8124e7"]}
             style={styles.gradient}
           >
             <Text style={styles.buttonText}>Add Reminder</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.buttonContainer}
+          onPress={sendNotification}
+        >
+          <LinearGradient
+            colors={["#256afe", "#8124e7"]}
+            style={styles.gradient}
+          >
+            <Text style={styles.buttonText}>Send Push Notifications</Text>
           </LinearGradient>
         </TouchableOpacity>
 
@@ -209,7 +476,15 @@ const Home = () => {
                 reminderDescription={item.description}
                 reminderDate={item.reminderDate}
                 reminderTime={item.reminderTime}
-                onPress={() => handleDeleteReminder(item.id)}
+                onDeletePress={() => handleDeleteReminder(item.id)}
+                onEditPress={() => {
+                  setEditReminderId(item.id);
+                  setEditReminderTitle(item.title);
+                  setEditReminderDescription(item.description);
+                  setEditReminderDate(item.reminderDate);
+                  setEditReminderTime(item.reminderTime);
+                  setIsPopupVisible(true);
+                }}
               />
             )}
           />
@@ -218,8 +493,6 @@ const Home = () => {
     </SafeAreaView>
   );
 };
-
-export default Home;
 
 const styles = StyleSheet.create({
   topContainer: {
@@ -307,4 +580,103 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontFamily: "PoppinsSemiBold",
   },
+
+  bottomSheetBackground: {
+    backgroundColor: "#3d439b",
+  },
+
+  contentContainer: {
+    paddingHorizontal: 20,
+  },
+
+  closeModal: {
+    paddingHorizontal: 10,
+    alignItems: "center",
+  },
+
+  quoteContainer: {
+    paddingVertical: 10,
+  },
+
+  modalContainer: {
+    flex: 1,
+    paddingTop: 300,
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: -1000,
+  },
+  popup: {
+    backgroundColor: "white",
+    padding: 15,
+    borderRadius: 10,
+    width: "90%",
+  },
+  popupItem: {
+    flexDirection: "row",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderColor: "lightgray",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  popupItemText: {
+    paddingRight: 10,
+    color: "white",
+    fontFamily: "PoppinsSemiBold",
+  },
+
+  editInput: {
+    fontFamily: "PoppinsMedium",
+    color: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "white",
+    paddingBottom: 5,
+    marginBottom: 10,
+  },
+
+  todoModalText: {
+    color: "white",
+    fontSize: 18,
+    fontFamily: "PoppinsBold",
+  },
+
+  closeContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  actionIcons: {
+    flexDirection: "row",
+  },
+
+  actionIcon: {
+    marginHorizontal: 5,
+  },
+
+  popupContent: {
+    // borderColor: "white",
+    // borderWidth: 1,
+    alignItems: "center",
+    marginTop: 20,
+    paddingVertical: 10,
+    flexDirection: "row",
+  },
+
+  popupContentText: {
+    color: "white",
+    fontFamily: "PoppinsSemiBold",
+    marginLeft: 10,
+  },
 });
+
+const bottomSheetHandleStyle = {
+  backgroundColor: "#3d439b",
+};
+
+export default Home;

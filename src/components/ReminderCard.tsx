@@ -54,7 +54,7 @@ const ReminderCard = ({
 
 const styles = StyleSheet.create({
   remindersBoxContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     paddingVertical: 10,
   },
   remindersBox: {

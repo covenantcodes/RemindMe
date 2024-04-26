@@ -94,30 +94,7 @@ const Onboard = () => {
         }
       }
     });
-    
-    // .onEnd((e) => {
-    //   const isSwipeLeft = e.translationX < 0;
-    //   const isSwipeRight = e.translationX > 0;
-    //   const isBeyondLeftLimit =
-    //     context.value < 2 * SCREEN_WIDTH && currentIndex <= 1;
-    //   const isBeyondRightLimit = context.value > 0;
-
-    //   let targetIndex;
-
-    //   if (isSwipeLeft && isBeyondLeftLimit) {
-    //     targetIndex =
-    //       e.translationX < -SCREEN_WIDTH / 2 || e.velocityX < -500
-    //         ? currentIndex + 1
-    //         : currentIndex;
-    //   } else if (isSwipeRight && !isBeyondRightLimit) {
-    //     targetIndex =
-    //       e.translationX > SCREEN_WIDTH / 2 || e.velocityX > 500 ? currentIndex : currentIndex + 1;
-    //   }
-
-    //   if (targetIndex !== undefined) {
-    //     x.value = withTiming(-SCREEN_WIDTH * targetIndex, { duration: 500 });
-    //   }
-    // });
+  
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
