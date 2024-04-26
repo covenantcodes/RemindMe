@@ -5,6 +5,8 @@ import {
   SafeAreaView,
   View,
   TouchableOpacity,
+  ScrollView,
+  FlatList
 } from "react-native";
 import GlobalStyles from "./GlobalStyles";
 import { LinearGradient } from "expo-linear-gradient";
@@ -13,11 +15,22 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import GlassmorphismTextInput from "./GlassmorphismTextInput";
 import DatePicker from "react-native-neat-date-picker";
 import TimePickerModal from "react-native-modal-datetime-picker";
 
 type Props = {};
+
+const reminderData = [
+  {
+    id: 1,
+    title: "Reminder 1",
+    description: "This is a 32 bit dseskldsklklsd",
+    reminderDate: "2023-02-23",
+    reminderTime: "23:09AM",
+  }
+]
 
 const currentTime = new Date();
 const hours = currentTime.getHours();
@@ -168,9 +181,25 @@ const Home = (props: Props) => {
           </LinearGradient>
         </TouchableOpacity>
 
+        <View style={styles.remindersMainContainer}>
+          <Text style={styles.remindersMainContainerText}>My Reminders</Text>
+          <ScrollView style={styles.remindersBoxContainer}>
+            <View style={styles.remindersBox}>
+              <TouchableOpacity style={styles.remindersCloseIcon}>
+                <FontAwesomeIcon
+                  icon={faTrash as IconProp}
+                  color={pickerIconColor}
+                  size={20}
+                />
+              </TouchableOpacity>
+              <Text style={styles.remindersTitle}>Reminder 1</Text>
+              <Text style={styles.remindersDescription}>
+                This a 32 charcgter descrrotion
+              </Text>
 
-        <View style={styles.cardsMainContainer}>
-            <Text style={styles.cardsMainContainerText}>My Reminders</Text>
+              <Text style={styles.remindersDescription}>Rings at: {date} {selectedTime}</Text>
+            </View>
+          </ScrollView>
         </View>
       </LinearGradient>
     </SafeAreaView>
@@ -198,9 +227,15 @@ const styles = StyleSheet.create({
   },
 
   topLeftButtonContainer: {
+    alignItems: "center",
+    justifyContent: "center",
     padding: 5,
     backgroundColor: "white",
     borderRadius: 25,
+    shadowColor: "rgba(255,255,255,0.3)",
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 1,
+    shadowRadius: 4
   },
 
   formBody: {
@@ -242,14 +277,46 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
 
-  buttonText:{
+  buttonText: {
     marginLeft: 10,
     color: "#fff",
     fontSize: 16,
     fontFamily: "PoppinsSemiBold",
   },
 
-  cardsMainContainer:{
-    
-  }
+  remindersMainContainer: {},
+
+  remindersMainContainerText: {
+    padding: 12,
+    color: "#fff",
+    fontSize: 22,
+    fontFamily: "PoppinsSemiBold",
+  },
+
+  remindersBoxContainer: {
+    paddingHorizontal: 20,
+  },
+
+  remindersBox: {
+    padding: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    borderRadius: 15,
+  },
+
+  remindersCloseIcon: {
+    flexDirection: "row",
+    justifyContent: "flex-end"
+  },
+
+  remindersTitle: {
+    fontSize: 16,
+    color: "#fff",
+    fontFamily: "PoppinsSemiBold",
+  },
+
+  remindersDescription: {
+    fontSize: 13,
+    color: "#fff",
+    fontFamily: "PoppinsMedium",
+  },
 });
