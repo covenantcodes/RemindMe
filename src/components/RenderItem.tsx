@@ -82,8 +82,9 @@ const styles = StyleSheet.create({
 
   itemText: {
     textAlign: "center",
-    fontSize: 44,
+    fontSize: 24,
     fontWeight: "bold",
+    fontFamily: 'PoppinsBold',
     marginTop: 40,
     marginBottom: 10,
     marginHorizontal: 20,

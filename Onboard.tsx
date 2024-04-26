@@ -21,6 +21,8 @@ import Background from "./src/components/Background";
 import Circle from "./src/components/Circle";
 
 import { useNavigation } from "@react-navigation/native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
 type Props = {};
 

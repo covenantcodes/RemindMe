@@ -1,16 +1,255 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  SafeAreaView,
+  View,
+  TouchableOpacity,
+} from "react-native";
+import GlobalStyles from "./GlobalStyles";
+import { LinearGradient } from "expo-linear-gradient";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faGear } from "@fortawesome/free-solid-svg-icons";
+import { faCalendar } from "@fortawesome/free-solid-svg-icons";
+import { faClock } from "@fortawesome/free-solid-svg-icons";
+import GlassmorphismTextInput from "./GlassmorphismTextInput";
+import DatePicker from "react-native-neat-date-picker";
+import TimePickerModal from "react-native-modal-datetime-picker";
 
-type Props = {}
+type Props = {};
 
-const Home = (props: Props) => {
-  return (
-    <View>
-      <Text>Home</Text>
-    </View>
-  )
+const currentTime = new Date();
+const hours = currentTime.getHours();
+let greeting;
+
+if (hours < 12) {
+  greeting = "Good Morning";
+} else if (hours < 18) {
+  greeting = "Good Afternoon";
+} else {
+  greeting = "Good Evening";
 }
 
-export default Home
+const settingIconColor: string = "#44196c";
+const pickerIconColor: string = "#fff";
 
-const styles = StyleSheet.create({})
+const Home = (props: Props) => {
+  const [reminderTitle, setReminderTitle] = useState("");
+  const [reminderDescription, setReminderDescription] = useState("");
+  const [showDatePickerSingle, setShowDatePickerSingle] = useState(false);
+
+  const [date, setDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+
+  const dateColorOptions = {
+    headerColor: "#0d132a",
+    backgroundColor: "#44196c",
+    dateTextColor: "#fff",
+  };
+
+  const openDatePickerSingle = () => setShowDatePickerSingle(true);
+
+  const onCancelSingle = () => {
+    setShowDatePickerSingle(false);
+  };
+
+  const onConfirmSingle = (output) => {
+    setShowDatePickerSingle(false);
+    console.log(output);
+    setDate(output.dateString);
+  };
+
+  // FOR TIME PICKER
+  const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
+
+  const showTimePicker = () => {
+    setTimePickerVisibility(true);
+  };
+
+  const hideTimePicker = () => {
+    setTimePickerVisibility(false);
+  };
+
+  const handleConfirm = (time) => {
+    setSelectedTime(time.toLocaleTimeString());
+    hideTimePicker();
+  };
+
+  return (
+    <SafeAreaView style={GlobalStyles.androidSafeArea}>
+      <LinearGradient
+        colors={["#0d132a", "#44196c"]}
+        style={styles.mainContainer}
+      >
+        <DatePicker
+          isVisible={showDatePickerSingle}
+          colorOptions={dateColorOptions}
+          mode={"single"}
+          onCancel={onCancelSingle}
+          onConfirm={onConfirmSingle}
+        />
+
+        <TimePickerModal
+          isVisible={isTimePickerVisible}
+          mode="time"
+          onConfirm={handleConfirm}
+          onCancel={hideTimePicker}
+        />
+        <View style={styles.topContainer}>
+          <Text style={styles.topTabText}>
+            {greeting} {"\n"}Superstar!
+          </Text>
+
+          <TouchableOpacity style={styles.topLeftButtonContainer}>
+            <FontAwesomeIcon
+              icon={faGear as IconProp}
+              color={settingIconColor}
+              size={24}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.formBody}>
+          <GlassmorphismTextInput
+            placeholder="Reminder Title"
+            maxLength={12}
+            value={reminderTitle}
+            onChangeText={setReminderTitle}
+          />
+          <GlassmorphismTextInput
+            placeholder="Reminder Description"
+            maxLength={32}
+            value={reminderDescription}
+            onChangeText={setReminderDescription}
+            multiline={true}
+            numberOfLines={1}
+          />
+
+          <View style={styles.dateTimeContainer}>
+            <TouchableOpacity
+              style={styles.dateContainer}
+              onPress={openDatePickerSingle}
+            >
+              <Text style={styles.dateText}>{date}</Text>
+
+              <View>
+                <FontAwesomeIcon
+                  icon={faCalendar as IconProp}
+                  color={pickerIconColor}
+                  size={20}
+                />
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.dateContainer}
+              onPress={showTimePicker}
+            >
+              <Text style={styles.dateText}>{selectedTime}</Text>
+
+              <View>
+                <FontAwesomeIcon
+                  icon={faClock as IconProp}
+                  color={pickerIconColor}
+                  size={20}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.buttonContainer}>
+          <LinearGradient
+            colors={["#256afe", "#8124e7"]}
+            style={styles.gradient}
+          >
+            <Text style={styles.buttonText}>Add Reminder</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+
+        <View style={styles.cardsMainContainer}>
+            <Text style={styles.cardsMainContainerText}>My Reminders</Text>
+        </View>
+      </LinearGradient>
+    </SafeAreaView>
+  );
+};
+
+export default Home;
+
+const styles = StyleSheet.create({
+  topContainer: {
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  topTabText: {
+    color: "#fff",
+    fontFamily: "PoppinsSemiBold",
+    fontSize: 22,
+  },
+
+  mainContainer: {
+    flex: 1,
+  },
+
+  topLeftButtonContainer: {
+    padding: 5,
+    backgroundColor: "white",
+    borderRadius: 25,
+  },
+
+  formBody: {
+    padding: 10,
+  },
+
+  dateTimeContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 20,
+  },
+
+  dateContainer: {
+    borderRadius: 15,
+    padding: 15,
+    width: "45%",
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  dateText: {
+    color: "#fff",
+    fontSize: 16,
+    fontFamily: "PoppinsMedium",
+  },
+
+  buttonContainer: {
+    padding: 15,
+    alignItems: "center",
+  },
+
+  gradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
+    width: "45%",
+    paddingVertical: 15,
+  },
+
+  buttonText:{
+    marginLeft: 10,
+    color: "#fff",
+    fontSize: 16,
+    fontFamily: "PoppinsSemiBold",
+  },
+
+  cardsMainContainer:{
+    
+  }
+});
