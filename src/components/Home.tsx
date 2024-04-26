@@ -14,8 +14,8 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
-import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faClock } from "@fortawesome/free-solid-svg-icons";
 import GlassmorphismTextInput from "./GlassmorphismTextInput";
 import DatePicker from "react-native-neat-date-picker";
 import TimePickerModal from "react-native-modal-datetime-picker";
@@ -26,7 +26,7 @@ const reminderData = [
   {
     id: 1,
     title: "Reminder 1",
-    description: "This is a 32 bit dseskldsklklsd",
+    description: "This is a 32 bit description",
     reminderDate: "2023-02-23",
     reminderTime: "23:09AM",
   }
@@ -183,23 +183,26 @@ const Home = (props: Props) => {
 
         <View style={styles.remindersMainContainer}>
           <Text style={styles.remindersMainContainerText}>My Reminders</Text>
-          <ScrollView style={styles.remindersBoxContainer}>
-            <View style={styles.remindersBox}>
-              <TouchableOpacity style={styles.remindersCloseIcon}>
-                <FontAwesomeIcon
-                  icon={faTrash as IconProp}
-                  color={pickerIconColor}
-                  size={20}
-                />
-              </TouchableOpacity>
-              <Text style={styles.remindersTitle}>Reminder 1</Text>
-              <Text style={styles.remindersDescription}>
-                This a 32 charcgter descrrotion
-              </Text>
+          <FlatList
+            data={reminderData}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <View style={styles.remindersBoxContainer}>
+                <View style={styles.remindersBox}>
+                  <View style={styles.remindersCloseIcon}>
+                    <FontAwesomeIcon
+                      icon={faTrash as IconProp}
+                      color="#fff"
+                      size={20}
+                    />
+                  </View>
+                  <Text style={styles.remindersTitle}>{item.title}</Text>
+                  <Text style={styles.remindersDescription}>{item.description}</Text>
+                </View>
+              </View>
+            )}
 
-              <Text style={styles.remindersDescription}>Rings at: {date} {selectedTime}</Text>
-            </View>
-          </ScrollView>
+            />
         </View>
       </LinearGradient>
     </SafeAreaView>

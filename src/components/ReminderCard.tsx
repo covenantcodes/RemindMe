@@ -1,17 +1,22 @@
-t
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
-types Props = {
+type Props = {
+  reminderTitle: string,
+  reminderDescription: string,
+  reminderDate: string,
+  reminderTime: string,
+};
 
-}
+const settingIconColor: string = "#44196c";
+const pickerIconColor: string = "#fff";
 
-const ReminderCard = (props:Props) => {
+const ReminderCard = ({reminderTitle, reminderDescription, reminderDate, reminderTime}:Props) => {
     return (
-       
-        <View style={styles.remindersMainContainer}>
-          <Text style={styles.remindersMainContainerText}>My Reminders</Text>
-          <ScrollView style={styles.remindersBoxContainer}>
+
+          <View style={styles.remindersBoxContainer}>
             <View style={styles.remindersBox}>
               <TouchableOpacity style={styles.remindersCloseIcon}>
                 <FontAwesomeIcon
@@ -20,27 +25,18 @@ const ReminderCard = (props:Props) => {
                   size={20}
                 />
               </TouchableOpacity>
-              <Text style={styles.remindersTitle}>Reminder 1</Text>
+              <Text style={styles.remindersTitle}>{reminderTitle}</Text>
               <Text style={styles.remindersDescription}>
-                This a 32 charcgter descrrotion
+                {reminderDescription}
               </Text>
 
-              <Text style={styles.remindersDescription}>Rings at: {date} {selectedTime}</Text>
+              <Text style={styles.remindersDescription}>Rings at: {reminderDate} {reminderTime}</Text>
             </View>
-          </ScrollView>
-        </View>
+          </View>
     );
 };
 
 const styles = StyleSheet.create({
-    remindersMainContainer: {},
-
-  remindersMainContainerText: {
-    padding: 12,
-    color: "#fff",
-    fontSize: 22,
-    fontFamily: "PoppinsSemiBold",
-  },
 
   remindersBoxContainer: {
     paddingHorizontal: 20,
