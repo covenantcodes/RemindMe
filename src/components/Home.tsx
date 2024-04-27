@@ -50,6 +50,20 @@ const Home = () => {
   const [editReminderTime, setEditReminderTime] = useState("");
   const [expoPushToken, setExpoPushToken] = useState("");
 
+
+  const currentTime = new Date();
+  const hours = currentTime.getHours();
+  let greeting;
+
+  if (hours < 12) {
+    greeting = "Good Morning";
+  } else if (hours < 18) {
+    greeting = "Good Afternoon";
+  } else {
+    greeting = "Good Evening";
+  }
+
+
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
@@ -109,33 +123,6 @@ const Home = () => {
 
     return token;
   }
-
-  // const sendNotification = async () => {
-  //   console.log("Sending push notifications");
-
-  //     //Notification Message
-  //     const message = {
-  //       to: expoPushToken,
-  //       sound: "default",
-  //       title: "Reminder",
-  //       body: "Don't forget to take your medicine!",
-  //       // data: { data: "goes here" },
-  //     };
-
-  //   await fetch ("https://exp.host/--/api/v2/push/send", {
-  //     method: "POST",
-  //     headers:{
-  //         host: "exp.host",
-  //         accept:"application/json",
-  //         "accept-encoding":"gzip, deflate",
-  //         "content-type": "application/json",
-  //     },
-
-  //     body: JSON.stringify(message),
-  //   });
-
-  //   console.log(message)
-  // };
 
   const sendNotification = async () => {
     console.log("Scheduling push notifications");
@@ -284,6 +271,18 @@ const Home = () => {
 
   const deleteIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Function to check and delete reminders after 5 seconds
+  // const checkAndDeleteReminders = () => {
+  //   const currentDate = new Date(); // Get the current date and time
+  //   reminders.forEach((reminder) => {
+  //     const reminderDateTime = new Date(`${reminder.reminderDate} ${reminder.reminderTime}`);
+  //     const timeDifference = reminderDateTime.getTime() - currentDate.getTime();
+  //     if (timeDifference > 0 && timeDifference <= 5000) { // Check if time difference is positive and less than or equal to 5 seconds
+  //       handleDeleteReminder(reminder.id); // Delete the reminder
+  //     }
+  //   });
+  // };
+
   const checkAndDeleteReminders = () => {
     const currentDate = new Date(); // Get the current date and time
     reminders.forEach((reminder) => {
@@ -291,7 +290,7 @@ const Home = () => {
         `${reminder.reminderDate} ${reminder.reminderTime}`
       );
       const timeDifference = reminderDateTime.getTime() - currentDate.getTime();
-      if (timeDifference >= 10000) {
+      if (timeDifference <= 100) {
         // Check if time difference is less than or equal to 10 seconds
         handleDeleteReminder(reminder.id); // Delete the reminder
       }
@@ -424,7 +423,7 @@ const Home = () => {
         />
 
         <View style={styles.topContainer}>
-          <Text style={styles.topTabText}>Good Morning {"\n"}Superstar!</Text>
+          <Text style={styles.topTabText}>{greeting} {"\n"}Superstar!</Text>
           {/* <TouchableOpacity style={styles.topLeftButtonContainer}>
             <FontAwesomeIcon
               icon={faGear as IconProp}

@@ -46,8 +46,15 @@
     },
     "plugins": [
       "expo-font",
-      "expo-build-properties"
+      "expo-build-properties",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+        }
+      ]
     ],
+    
     "extra": {
       "eas": {
         "projectId": "e28a41a2-6679-4d9d-aa1d-3ad436ae50e6"
