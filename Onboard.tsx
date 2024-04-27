@@ -26,11 +26,8 @@ import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
 type Props = {};
 
-
-
 const Onboard = () => {
   const navigation = useNavigation();
-
 
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const x = useSharedValue(0);
@@ -70,31 +67,31 @@ const Onboard = () => {
     .onEnd((e) => {
       const isSwipeLeft = e.translationX < 0;
       const isSwipeRight = e.translationX > 0;
-      const isBeyondLeftLimit = context.value < 2 * SCREEN_WIDTH && currentIndex <= 1;
+      const isBeyondLeftLimit =
+        context.value < 2 * SCREEN_WIDTH && currentIndex <= 1;
       const isBeyondRightLimit = context.value > 0;
-    
+
       let targetIndex;
-    
+
       if (isSwipeLeft && isBeyondLeftLimit) {
-        targetIndex = e.translationX < -SCREEN_WIDTH / 2 || e.velocityX < -500
-          ? currentIndex + 1
-          : currentIndex;
+        targetIndex =
+          e.translationX < -SCREEN_WIDTH / 2 || e.velocityX < -500
+            ? currentIndex + 1
+            : currentIndex;
       } else if (isSwipeRight && !isBeyondRightLimit) {
-        targetIndex = e.translationX > SCREEN_WIDTH / 2 || e.velocityX > 500
-          ? currentIndex
-          : currentIndex + 1;
+        targetIndex =
+          e.translationX > SCREEN_WIDTH / 2 || e.velocityX > 500
+            ? currentIndex
+            : currentIndex + 1;
       }
-    
+
       if (targetIndex !== undefined) {
         x.value = withTiming(-SCREEN_WIDTH * targetIndex, { duration: 500 });
-    
-        // Check if the targetIndex is the index of the third onboarding screen (index 2)
+
         if (targetIndex === 2) {
-          
         }
       }
     });
-  
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -123,7 +120,6 @@ const Onboard = () => {
         screenWidth={SCREEN_WIDTH}
         x={x}
         currentIndex={currentIndex}
-        
       />
     </GestureHandlerRootView>
   );

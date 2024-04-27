@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   FlatList,
   Modal,
-  Platform
+  Platform,
+  Image
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -23,7 +24,7 @@ import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 // For Notifications
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { scheduleNotificationAsync } from 'expo-notifications';
+import { scheduleNotificationAsync } from "expo-notifications";
 
 type Reminder = {
   id: number;
@@ -49,7 +50,6 @@ const Home = () => {
   const [editReminderTime, setEditReminderTime] = useState("");
   const [expoPushToken, setExpoPushToken] = useState("");
 
-
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
@@ -58,9 +58,9 @@ const Home = () => {
     }),
   });
 
-  useEffect(()=> {
+  useEffect(() => {
     sendNotification();
-}, [reminders]);
+  }, [reminders]);
 
   useEffect(() => {
     console.log("Registering for Push Notifications");
@@ -70,7 +70,7 @@ const Home = () => {
         setExpoPushToken(token);
       })
       .catch((err) => console.log(err));
-  }, [])
+  }, []);
 
   async function registerForPushNotificationsAsync() {
     let token;
@@ -109,7 +109,7 @@ const Home = () => {
 
     return token;
   }
-  
+
   // const sendNotification = async () => {
   //   console.log("Sending push notifications");
 
@@ -139,35 +139,33 @@ const Home = () => {
 
   const sendNotification = async () => {
     console.log("Scheduling push notifications");
-  
+
     // Iterate over reminders and schedule notification for each one
     reminders.forEach(async (reminder) => {
-      // Convert reminder date and time to a single Date object
-      const reminderDateTime = new Date(`${reminder.reminderDate} ${reminder.reminderTime}`);
-  
+      const reminderDateTime = new Date(
+        `${reminder.reminderDate} ${reminder.reminderTime}`
+      );
+
       // Schedule notification
       try {
         await scheduleNotificationAsync({
           content: {
             title: reminder.title,
             body: reminder.description,
-            sound: 'default',
+            sound: require("../../assets/sound.mp3"),
             // data: { data: 'goes here' },
           },
           trigger: {
-            date: reminderDateTime, // Schedule notification for the reminder date and time
+            date: reminderDateTime,
           },
         });
-  
+
         console.log("Notification scheduled for:", reminder.title);
       } catch (error) {
         console.error("Error scheduling notification:", error);
       }
     });
   };
-  
-  
-  
 
   useEffect(() => {
     loadReminders();
@@ -177,7 +175,17 @@ const Home = () => {
     try {
       const savedReminders = await AsyncStorage.getItem("reminders");
       if (savedReminders !== null) {
-        setReminders(JSON.parse(savedReminders));
+        const parsedReminders = JSON.parse(savedReminders);
+        const currentDate = new Date(); // Get current date and time
+        const updatedReminders = parsedReminders.filter((reminder) => {
+          // Parse the reminder's date and time
+          const reminderDateTime = new Date(
+            `${reminder.reminderDate} ${reminder.reminderTime}`
+          );
+          // Compare with current date and time
+          return reminderDateTime.getTime() > currentDate.getTime();
+        });
+        setReminders(updatedReminders);
       }
     } catch (error) {
       console.error("Error loading reminders:", error);
@@ -212,7 +220,6 @@ const Home = () => {
       alert("Please fill in all fields.");
     }
   };
-  
 
   const handleDeleteReminder = (id: number) => {
     const updatedReminders = reminders.filter((reminder) => reminder.id !== id);
@@ -239,6 +246,9 @@ const Home = () => {
             }
           : reminder
       );
+
+      console.log("Updated Reminders:", updatedReminders); // Log the updated reminders array
+
       setReminders(updatedReminders);
       saveReminders(updatedReminders);
       setIsPopupVisible(false);
@@ -268,10 +278,36 @@ const Home = () => {
   };
 
   const handleAddReminderAndSendNotification = () => {
-    handleAddReminder(); 
+    handleAddReminder();
     sendNotification();
   };
-  
+
+  const deleteIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const checkAndDeleteReminders = () => {
+    const currentDate = new Date(); // Get the current date and time
+    reminders.forEach((reminder) => {
+      const reminderDateTime = new Date(
+        `${reminder.reminderDate} ${reminder.reminderTime}`
+      );
+      const timeDifference = reminderDateTime.getTime() - currentDate.getTime();
+      if (timeDifference >= 10000) {
+        // Check if time difference is less than or equal to 10 seconds
+        handleDeleteReminder(reminder.id); // Delete the reminder
+      }
+    });
+  };
+
+  // Effect to start the interval for checking and deleting reminders
+  useEffect(() => {
+    deleteIntervalRef.current = setInterval(checkAndDeleteReminders, 1000);
+    return () => {
+      // Clean up the interval when the component unmounts
+      if (deleteIntervalRef.current) {
+        clearInterval(deleteIntervalRef.current);
+      }
+    };
+  }, [reminders]);
 
   // CLOSE POPUP
   const closemodal = () => {
@@ -452,30 +488,42 @@ const Home = () => {
             <Text style={styles.buttonText}>Add Reminder</Text>
           </LinearGradient>
         </TouchableOpacity>
-        
+
         <View style={styles.remindersMainContainer}>
           <Text style={styles.remindersMainContainerText}>My Reminders</Text>
-          <FlatList
-            data={reminders}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <ReminderCard
-                reminderTitle={item.title}
-                reminderDescription={item.description}
-                reminderDate={item.reminderDate}
-                reminderTime={item.reminderTime}
-                onDeletePress={() => handleDeleteReminder(item.id)}
-                onEditPress={() => {
-                  setEditReminderId(item.id);
-                  setEditReminderTitle(item.title);
-                  setEditReminderDescription(item.description);
-                  setEditReminderDate(item.reminderDate);
-                  setEditReminderTime(item.reminderTime);
-                  setIsPopupVisible(true);
-                }}
+          {reminders.length === 0 ? (
+            <View style={styles.noRemindersContainer}>  
+              <Image
+                  source={require("../../assets/message.png")}
+                  style={{width: 250, height: 250}}
               />
-            )}
-          />
+              <Text style={styles.emptyListMessage}>
+                No reminders added yet.
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={reminders}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <ReminderCard
+                  reminderTitle={item.title}
+                  reminderDescription={item.description}
+                  reminderDate={item.reminderDate}
+                  reminderTime={item.reminderTime}
+                  onDeletePress={() => handleDeleteReminder(item.id)}
+                  onEditPress={() => {
+                    setEditReminderId(item.id);
+                    setEditReminderTitle(item.title);
+                    setEditReminderDescription(item.description);
+                    setEditReminderDate(item.reminderDate);
+                    setEditReminderTime(item.reminderTime);
+                    setIsPopupVisible(true);
+                  }}
+                />
+              )}
+            />
+          )}
         </View>
       </LinearGradient>
     </SafeAreaView>
@@ -484,7 +532,7 @@ const Home = () => {
 
 const styles = StyleSheet.create({
   topContainer: {
-    paddingVerttical: 2,
+    paddingVertical: 2,
     paddingHorizontal: 10,
     flexDirection: "row",
     alignItems: "center",
@@ -500,6 +548,8 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
   },
+
+
 
   topLeftButtonContainer: {
     alignItems: "center",
@@ -568,6 +618,18 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 22,
     fontFamily: "PoppinsSemiBold",
+  },
+
+  noRemindersContainer: {
+    flex: 0.6,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  emptyListMessage:{
+      color: "#fff",
+      fontSize: 20,
+      fontFamily: "PoppinsSemiBold",
   },
 
   bottomSheetBackground: {

@@ -1,3 +1,4 @@
+import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faTrash, faPen } from "@fortawesome/free-solid-svg-icons";
@@ -26,7 +27,7 @@ const ReminderCard = ({
     <View style={styles.remindersBoxContainer}>
       <View style={styles.remindersBox}>
         <View style={styles.reminderIconContainer}>
-        <TouchableOpacity style={styles.remindersCloseIcon} onPress={onEditPress}>
+          <TouchableOpacity style={styles.remindersCloseIcon} onPress={onEditPress}>
             <FontAwesomeIcon
               icon={faPen as IconProp}
               color={pickerIconColor}
@@ -62,19 +63,12 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderRadius: 15,
   },
-
-  reminderIconContainer:{
+  reminderIconContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
-// `    borderColor: "red",
-//     borderWidth: 1`
-
   },
-
   remindersCloseIcon: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginLeft: 15
+    marginLeft: 15,
   },
   remindersTitle: {
     fontSize: 16,

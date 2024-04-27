@@ -14,7 +14,7 @@ const Stack = createNativeStackNavigator();
 const App = (props: Props) => {
   // FONTS
   const [fontsLoaded] = useFonts({
-  //   // POPPINS
+    // POPPINS
     PoppinsThin: require("./assets/fonts/Poppins/Poppins-Thin.ttf"),
     PoppinsThinItaltic: require("./assets/fonts/Poppins/Poppins-ThinItalic.ttf"),
     PoppinsLight: require("./assets/fonts/Poppins/Poppins-Light.ttf"),

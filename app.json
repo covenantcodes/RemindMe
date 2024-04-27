@@ -30,6 +30,8 @@
     "android": {
       "package": "com.covenantcodes.remindme",
       "versionCode": 1,
+      "useNextNotificationsApi": true,
+      "permissions": ["RECEIVE_BOOT_COMPLETED"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
