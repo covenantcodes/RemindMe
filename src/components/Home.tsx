@@ -389,13 +389,13 @@ const Home = () => {
 
         <View style={styles.topContainer}>
           <Text style={styles.topTabText}>Good Morning {"\n"}Superstar!</Text>
-          <TouchableOpacity style={styles.topLeftButtonContainer}>
+          {/* <TouchableOpacity style={styles.topLeftButtonContainer}>
             <FontAwesomeIcon
               icon={faGear as IconProp}
               color="#44196c"
               size={24}
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <View style={styles.formBody}>
@@ -452,19 +452,7 @@ const Home = () => {
             <Text style={styles.buttonText}>Add Reminder</Text>
           </LinearGradient>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.buttonContainer}
-          onPress={sendNotification}
-        >
-          <LinearGradient
-            colors={["#256afe", "#8124e7"]}
-            style={styles.gradient}
-          >
-            <Text style={styles.buttonText}>Send Push Notifications</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-
+        
         <View style={styles.remindersMainContainer}>
           <Text style={styles.remindersMainContainerText}>My Reminders</Text>
           <FlatList
@@ -496,7 +484,8 @@ const Home = () => {
 
 const styles = StyleSheet.create({
   topContainer: {
-    padding: 2,
+    paddingVerttical: 2,
+    paddingHorizontal: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
