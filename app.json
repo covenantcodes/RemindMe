@@ -28,22 +28,29 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.covenantcodes.remindme",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "googleServicesFile": "./google-services.json",
+      "compileSdkVersion": 31,
+      "targetSdkVersion": 31,
+      "buildToolsVersion": "31.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-build-properties"
     ],
     "extra": {
       "eas": {
         "projectId": "e28a41a2-6679-4d9d-aa1d-3ad436ae50e6"
       }
     },
-    "owner": "potash"
+    "owner": "covenantcodes"
   }
 }

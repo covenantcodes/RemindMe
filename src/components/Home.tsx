@@ -496,7 +496,7 @@ const Home = () => {
 
 const styles = StyleSheet.create({
   topContainer: {
-    padding: 12,
+    padding: 2,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
