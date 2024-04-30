@@ -17,9 +17,9 @@
       ]
     },
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splashscreen.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#44196c"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -33,7 +33,7 @@
       "useNextNotificationsApi": true,
       "permissions": ["RECEIVE_BOOT_COMPLETED"],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
       "googleServicesFile": "./google-services.json",
@@ -50,7 +50,8 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/icon.png",
+          "icon": "./assets/notification_icon.png",
+          "color": "#44196c"
         }
       ]
     ],
