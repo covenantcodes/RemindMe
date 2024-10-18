@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
   textInputContainer: {
     marginTop: 20,
     borderRadius: 15,
+    height: 50,
     backgroundColor: "rgba(255, 255, 255, 0.3)",
     shadowColor: "rgba(0, 0, 0, 0.2)",
     shadowOffset: { width: 0, height: 3 },

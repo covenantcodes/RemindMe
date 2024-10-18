@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 import Onboard from "./Onboard";
-import Home from "./src/components/Home";
+import Home from "./src/screens/Home";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
-import AppNavigator from "./Navigation/AppNavigator";
+import AppNavigator from "./navigation/AppNavigator";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 type Props = {};
@@ -31,7 +31,11 @@ const App = (props: Props) => {
     return null;
   }
 
-  return <AppNavigator />;
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppNavigator />
+    </GestureHandlerRootView>
+  );
 };
 
 const styles = StyleSheet.create({

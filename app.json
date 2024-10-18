@@ -25,13 +25,16 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.covenantcodes.remindme"
     },
     "android": {
       "package": "com.covenantcodes.remindme",
       "versionCode": 1,
       "useNextNotificationsApi": true,
-      "permissions": ["RECEIVE_BOOT_COMPLETED"],
+      "permissions": [
+        "RECEIVE_BOOT_COMPLETED"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
@@ -55,7 +58,6 @@
         }
       ]
     ],
-    
     "extra": {
       "eas": {
         "projectId": "e28a41a2-6679-4d9d-aa1d-3ad436ae50e6"

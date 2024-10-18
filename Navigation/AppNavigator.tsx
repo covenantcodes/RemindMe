@@ -1,23 +1,32 @@
-import {View, Text, StyleSheet} from 'react-native'
+// src/navigators/AppNavigator.js
+import { View, Text, StyleSheet } from "react-native";
 import Onboard from "../Onboard";
-import Home from "../src/components/Home";
 import { NavigationContainer } from "@react-navigation/native";
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { ReminderProvider } from "../src/context/ReminderContext";
+import TabNavigator from "./TabNavigator"; // Import the TabNavigator
 
-type AppNavigatorProps = {}
+const Stack = createNativeStackNavigator();
 
-const Stack = createNativeStackNavigator()
-
-const AppNavigator = (props: AppNavigatorProps) => {
+const AppNavigator = () => {
   return (
-    <NavigationContainer>
-    <Stack.Navigator initialRouteName="Onboard">
-        <Stack.Screen name="Onboard" component={Onboard} options={{headerShown: false}}/>
-        <Stack.Screen name="Home" component={Home} options={{headerShown: false}}/>
-    </Stack.Navigator>
-  </NavigationContainer>
-  )
-}
+    <ReminderProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Onboard">
+          <Stack.Screen
+            name="Onboard"
+            component={Onboard}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Tabs" // Change this to a more relevant name
+            component={TabNavigator} // Use the TabNavigator
+            options={{ headerShown: false }} // Optional, set to true if you want a header
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </ReminderProvider>
+  );
+};
 
-
-export default AppNavigator
+export default AppNavigator;
