@@ -8,16 +8,19 @@ import {
   FlatList,
   Modal,
   Platform,
-  Image
+  Image,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faGear, faCalendar, faClock } from "@fortawesome/free-solid-svg-icons";
+import {
+  faGear,
+  faCalendar,
+  faClock,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
 import GlassmorphismTextInput from "./GlassmorphismTextInput";
-import DatePicker from "react-native-neat-date-picker";
-import TimePickerModal from "react-native-modal-datetime-picker";
 import ReminderCard from "./ReminderCard";
 import GlobalStyles from "./GlobalStyles";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -25,6 +28,8 @@ import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { scheduleNotificationAsync } from "expo-notifications";
+import TimePickerComponent from "./TimePickerComponent";
+import DatePickerComponent from "./DatePickerComponent";
 
 type Reminder = {
   id: number;
@@ -35,6 +40,8 @@ type Reminder = {
 };
 
 const Home = () => {
+  const [isAddReminderModalVisible, setIsAddReminderModalVisible] =
+    useState(false);
   const [reminderTitle, setReminderTitle] = useState("");
   const [reminderDescription, setReminderDescription] = useState("");
   const [reminderDate, setReminderDate] = useState("");
@@ -50,7 +57,6 @@ const Home = () => {
   const [editReminderTime, setEditReminderTime] = useState("");
   const [expoPushToken, setExpoPushToken] = useState("");
 
-
   const currentTime = new Date();
   const hours = currentTime.getHours();
   let greeting;
@@ -62,7 +68,6 @@ const Home = () => {
   } else {
     greeting = "Good Evening";
   }
-
 
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -196,7 +201,7 @@ const Home = () => {
         reminderDate,
         reminderTime,
       };
-      const updatedReminders = [newReminder, ...reminders]; // Add new reminder to the beginning of the array
+      const updatedReminders = [newReminder, ...reminders];
       setReminders(updatedReminders);
       saveReminders(updatedReminders);
       setReminderTitle("");
@@ -206,6 +211,7 @@ const Home = () => {
     } else {
       alert("Please fill in all fields.");
     }
+    setIsAddReminderModalVisible(false);
   };
 
   const handleDeleteReminder = (id: number) => {
@@ -363,28 +369,14 @@ const Home = () => {
                 numberOfLines={3}
               />
               <View style={styles.dateTimeContainer}>
-                <TouchableOpacity
-                  style={styles.dateContainer}
-                  onPress={openDatePickerSingle}
-                >
-                  <Text style={styles.dateText}>{editReminderDate}</Text>
-                  <FontAwesomeIcon
-                    icon={faCalendar as IconProp}
-                    color="#fff"
-                    size={20}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.dateContainer}
-                  onPress={() => setShowTimePicker(true)}
-                >
-                  <Text style={styles.dateText}>{editReminderTime}</Text>
-                  <FontAwesomeIcon
-                    icon={faClock as IconProp}
-                    color="#fff"
-                    size={20}
-                  />
-                </TouchableOpacity>
+                <DatePickerComponent
+                  selectedDate={editReminderDate}
+                  onDateChange={setEditReminderDate}
+                />
+                <TimePickerComponent
+                  reminderTime={editReminderTime}
+                  setReminderTime={setEditReminderTime}
+                />
               </View>
               <TouchableOpacity
                 style={styles.buttonContainer}
@@ -401,100 +393,92 @@ const Home = () => {
           </View>
         </Modal>
 
-        <View style={{ zIndex: 1000 }}>
-          <DatePicker
-            isVisible={showDatePickerSingle}
-            colorOptions={{
-              headerColor: "#0d132a",
-              backgroundColor: "#44196c",
-              dateTextColor: "#fff",
-            }}
-            mode="single"
-            onCancel={onCancelSingle}
-            onConfirm={onConfirmSingle}
-          />
-        </View>
-
-        <TimePickerModal
-          isVisible={showTimePicker}
-          mode="time"
-          onConfirm={onConfirmTimePicker}
-          onCancel={onCancelTimePicker}
-        />
-
         <View style={styles.topContainer}>
-          <Text style={styles.topTabText}>{greeting} {"\n"}Superstar!</Text>
-          {/* <TouchableOpacity style={styles.topLeftButtonContainer}>
-            <FontAwesomeIcon
-              icon={faGear as IconProp}
-              color="#44196c"
-              size={24}
-            />
-          </TouchableOpacity> */}
+          <Text style={styles.topTabText}>
+            {greeting} {"\n"}Superstar!
+          </Text>
         </View>
 
-        <View style={styles.formBody}>
-          <GlassmorphismTextInput
-            placeholder="Reminder Title"
-            maxLength={12}
-            value={reminderTitle}
-            onChangeText={setReminderTitle}
-          />
-          <GlassmorphismTextInput
-            placeholder="Reminder Description"
-            maxLength={32}
-            value={reminderDescription}
-            onChangeText={setReminderDescription}
-            multiline={true}
-            numberOfLines={1}
-          />
-
-          <View style={styles.dateTimeContainer}>
-            <TouchableOpacity
-              style={styles.dateContainer}
-              onPress={openDatePickerSingle}
-            >
-              <Text style={styles.dateText}>{reminderDate}</Text>
-              <FontAwesomeIcon
-                icon={faCalendar as IconProp}
-                color="#fff"
-                size={20}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.dateContainer}
-              onPress={() => setShowTimePicker(true)}
-            >
-              <Text style={styles.dateText}>{reminderTime}</Text>
-              <FontAwesomeIcon
-                icon={faClock as IconProp}
-                color="#fff"
-                size={20}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          style={styles.buttonContainer}
-          onPress={handleAddReminderAndSendNotification}
+        <Modal
+          visible={isAddReminderModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setIsAddReminderModalVisible(false)}
         >
-          <LinearGradient
-            colors={["#256afe", "#8124e7"]}
-            style={styles.gradient}
-          >
-            <Text style={styles.buttonText}>Add Reminder</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+          <View style={styles.modalContainer}>
+            <LinearGradient
+              colors={["#032a80", "#3d0373"]}
+              style={styles.popup}
+            >
+              <View style={styles.closeContainer}>
+                <MaterialCommunityIcons
+                  name="close"
+                  color="white"
+                  size={20}
+                  onPress={() => setIsAddReminderModalVisible(false)}
+                />
+              </View>
+              {/* MODAL HEADER  */}
+              <View style={styles.modalHeader}>
+                <Text style={styles.todoModalText}>Add Task</Text>
+              </View>
+              {/* MODAL CONTENTS */}
+              <GlassmorphismTextInput
+                placeholder="Reminder Title"
+                maxLength={12}
+                value={reminderTitle}
+                onChangeText={setReminderTitle}
+              />
+              <GlassmorphismTextInput
+                placeholder="Reminder Description"
+                maxLength={32}
+                value={reminderDescription}
+                onChangeText={setReminderDescription}
+                multiline={true}
+                numberOfLines={1}
+              />
+
+              <View style={styles.dateTimeContainer}>
+                <DatePickerComponent
+                  selectedDate={reminderDate}
+                  onDateChange={setReminderDate}
+                />
+
+                <TimePickerComponent
+                  reminderTime={reminderTime}
+                  setReminderTime={setReminderTime}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.buttonContainer}
+                onPress={handleAddReminderAndSendNotification}
+              >
+                <LinearGradient
+                  colors={["#256afe", "#8124e7"]}
+                  style={styles.gradient}
+                >
+                  <Text style={styles.buttonText}>Add Task</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </LinearGradient>
+          </View>
+        </Modal>
 
         <View style={styles.remindersMainContainer}>
-          <Text style={styles.remindersMainContainerText}>My Reminders</Text>
+          <View style={styles.remindersHeader}>
+            <Text style={styles.remindersMainContainerText}>My Tasks</Text>
+            <TouchableOpacity
+              onPress={() => setIsAddReminderModalVisible(true)}
+            >
+              <FontAwesomeIcon icon={faPlus} size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
           {reminders.length === 0 ? (
-            <View style={styles.noRemindersContainer}>  
+            <View style={styles.noRemindersContainer}>
               <Image
-                  source={require("../../assets/message.png")}
-                  style={{width: 250, height: 250}}
+                source={require("../../assets/message.png")}
+                style={{ width: 250, height: 250 }}
               />
               <Text style={styles.emptyListMessage}>
                 No reminders added yet.
@@ -548,8 +532,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-
-
   topLeftButtonContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -560,6 +542,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
     shadowRadius: 4,
+  },
+
+  formContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignContent: "center",
+    justifyContent: "center",
   },
 
   formBody: {
@@ -588,7 +577,7 @@ const styles = StyleSheet.create({
   },
 
   buttonContainer: {
-    padding: 15,
+    padding: 18,
     alignItems: "center",
   },
 
@@ -612,6 +601,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  remindersHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingRight: 10,
+    justifyContent: "space-between",
+  },
+
   remindersMainContainerText: {
     padding: 12,
     color: "#fff",
@@ -625,10 +621,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  emptyListMessage:{
-      color: "#fff",
-      fontSize: 20,
-      fontFamily: "PoppinsSemiBold",
+  emptyListMessage: {
+    color: "#fff",
+    fontSize: 20,
+    fontFamily: "PoppinsSemiBold",
   },
 
   bottomSheetBackground: {
